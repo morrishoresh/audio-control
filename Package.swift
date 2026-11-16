@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "AudioControl",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS("14.4")],
     targets: [
         .executableTarget(name: "AudioControl", path: "Sources/AudioControl")
     ]

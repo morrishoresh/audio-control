@@ -17,8 +17,18 @@
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
+    <string>14.4</string>
     <key>LSUIElement</key>
     <true/>
+    <key>NSAudioCaptureUsageDescription</key>
+    <string>AudioControl captures each app's audio to apply per-app volume and output device.</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>AudioControl sets Music's volume, including while Music plays to AirPlay.</string>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>AudioControl sets the volume of AirPlay receivers that accept network control.</string>
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_airplay._tcp</string>
+    </array>
 </dict>
 </plist>

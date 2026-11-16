@@ -33,7 +33,9 @@ enum Direction: CaseIterable {
 }
 
 enum AudioDevices {
-    private static let system = AudioObjectID(kAudioObjectSystemObject)
+    static let system = AudioObjectID(kAudioObjectSystemObject)
+    /// UID prefix of the private aggregate devices this app creates for per-app routing; hidden from device lists.
+    static let privateUIDPrefix = "com.morrishoresh.AudioControl."
 
     static func devices(_ direction: Direction) -> [AudioDevice] {
         var address = globalAddress(kAudioHardwarePropertyDevices)
@@ -44,6 +46,7 @@ enum AudioDevices {
 
         return ids.filter { channelCount($0, direction) > 0 }.compactMap { id in
             guard let uid = stringProperty(id, kAudioDevicePropertyDeviceUID),
+                  !uid.hasPrefix(privateUIDPrefix),
                   let name = stringProperty(id, kAudioObjectPropertyName) else { return nil }
             return AudioDevice(id: id, uid: uid, name: name)
         }
@@ -53,14 +56,20 @@ enum AudioDevices {
         deviceID(direction.defaultDeviceSelector)
     }
 
+    static func defaultDeviceUID(_ direction: Direction) -> String? {
+        defaultDeviceID(direction).flatMap { stringProperty($0, kAudioDevicePropertyDeviceUID) }
+    }
+
     /// Device used for alerts and sound effects (System Settings > Sound > Play sound effects through).
     static func systemOutputDeviceID() -> AudioDeviceID? {
         deviceID(kAudioHardwarePropertyDefaultSystemOutputDevice)
     }
 
-    /// Calls `handler` on the main queue whenever the default output or input device changes, or devices are added or removed.
+    /// Calls `handler` on the main queue whenever the default output or input device changes, devices are added or
+    /// removed, or the set of processes using audio changes.
     static func observeChanges(_ handler: @escaping @Sendable () -> Void) {
-        let selectors = Direction.allCases.map(\.defaultDeviceSelector) + [kAudioHardwarePropertyDevices]
+        let selectors = Direction.allCases.map(\.defaultDeviceSelector)
+            + [kAudioHardwarePropertyDevices, kAudioHardwarePropertyProcessObjectList]
         for selector in selectors {
             var address = globalAddress(selector)
             AudioObjectAddPropertyListenerBlock(system, &address, .main) { _, _ in handler() }
@@ -96,9 +105,21 @@ enum AudioDevices {
         _ = setProperty(id, direction, kAudioDevicePropertyMute, element: kAudioObjectPropertyElementMain, value: UInt32(0))
     }
 
+    /// Number of streams the device has in `direction`.
+    static func streamCount(_ id: AudioDeviceID, _ direction: Direction) -> Int {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioDevicePropertyStreams,
+            mScope: direction.scope,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var size: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(id, &address, 0, nil, &size) == noErr else { return 0 }
+        return Int(size) / MemoryLayout<AudioStreamID>.size
+    }
+
     // MARK: - Helpers
 
-    private static func globalAddress(_ selector: AudioObjectPropertySelector) -> AudioObjectPropertyAddress {
+    static func globalAddress(_ selector: AudioObjectPropertySelector) -> AudioObjectPropertyAddress {
         AudioObjectPropertyAddress(
             mSelector: selector,
             mScope: kAudioObjectPropertyScopeGlobal,
@@ -136,7 +157,7 @@ enum AudioDevices {
         return buffers.reduce(0) { $0 + Int($1.mNumberChannels) }
     }
 
-    private static func stringProperty(_ id: AudioObjectID, _ selector: AudioObjectPropertySelector) -> String? {
+    static func stringProperty(_ id: AudioObjectID, _ selector: AudioObjectPropertySelector) -> String? {
         var address = globalAddress(selector)
         var value: Unmanaged<CFString>?
         var size = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
