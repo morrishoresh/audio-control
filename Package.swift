@@ -2,9 +2,9 @@
 import PackageDescription
 
 let package = Package(
-    name: "AudioAutoSwitch",
+    name: "AudioControl",
     platforms: [.macOS(.v13)],
     targets: [
-        .executableTarget(name: "AudioAutoSwitch", path: "Sources/AudioAutoSwitch")
+        .executableTarget(name: "AudioControl", path: "Sources/AudioControl")
     ]
 )

@@ -1,4 +1,4 @@
-# AudioAutoSwitch
+# AudioControl
 
 Menu-bar app. On launch and on every wake from sleep:
 
@@ -10,17 +10,17 @@ A target that is not connected is left alone. Retries for 20 s to catch Bluetoot
 ## Build / install
 
 ```sh
-./build.sh            # builds build/AudioAutoSwitch.app
+./build.sh            # builds build/AudioControl.app
 ./build.sh --install  # also copies it to /Applications
 ```
 
 ## Use
 
-1. Open `/Applications/AudioAutoSwitch.app` (speaker icon in the menu bar).
+1. Open `/Applications/AudioControl.app` (speaker icon in the menu bar).
 2. Target Output Device / Target Input Device -> pick the devices; Target Output Volume / Target Input Volume -> pick the levels.
 3. Enable Launch at Login.
 
-Logs: `log stream --predicate 'subsystem == "com.morrishoresh.AudioAutoSwitch"'`
+Logs: `log stream --predicate 'subsystem == "com.morrishoresh.AudioControl"'`
 
 Devices without software volume (most HDMI/DisplayPort outputs) are switched to, but volume is left unchanged.
 

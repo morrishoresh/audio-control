@@ -21,7 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let percent: Int?
     }
 
-    private let log = Logger(subsystem: "com.morrishoresh.AudioAutoSwitch", category: "switch")
+    private let log = Logger(subsystem: "com.morrishoresh.AudioControl", category: "switch")
     private let defaults = UserDefaults.standard
     private var statusItem: NSStatusItem!
     private var retryTimer: Timer?
@@ -160,7 +160,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             lines.append("\(direction.label): \(current?.name ?? "unknown")")
         }
         let symbol = onTarget ? "speaker.wave.3" : "speaker.badge.exclamationmark"
-        statusItem.button?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: "AudioAutoSwitch")
+        statusItem.button?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: "AudioControl")
         statusItem.button?.toolTip = lines.joined(separator: "\n")
     }
 
